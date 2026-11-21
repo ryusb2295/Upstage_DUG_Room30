@@ -1,0 +1,1765 @@
+{
+  "kind": "studio.workflow-config-draft",
+  "schemaVersion": 4,
+  "exportedAt": "2026-11-10T01:38:32.619Z",
+  "exportedFrom": {
+    "workflowId": "agt_Wrbc2zpissyCfncTQyZppH",
+    "workflowName": "GradLens",
+    "configId": "cfg_E6Wko57Ac6FqSXv5iyqrcQ",
+    "configVer": 20
+  },
+  "workflowConfig": {
+    "workflow_name": "GradLens",
+    "pipelineType": "instruct",
+    "documentParseConfiguration": {
+      "modelName": "document-parse",
+      "mode": "standard",
+      "ocrMode": "force",
+      "lang": "",
+      "chartRecognition": false,
+      "coordinates": true,
+      "mergeMultipageTables": false,
+      "outputFormats": [
+        "html",
+        "text"
+      ],
+      "base64Encoding": [
+        "figure"
+      ]
+    },
+    "documentClassifyConfiguration": {
+      "modelName": "",
+      "schema": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "document-classify",
+          "schema": {
+            "type": "string",
+            "oneOf": [
+              {
+                "const": "transcript",
+                "description": "학기별 과목코드·교과목명·이수구분·학점·성적이 표로 있고, 총 취득학점과 평점평균이 적힌 성적증명서(국문, 영문 Official Transcript 모두)"
+              },
+              {
+                "const": "transfer_credit",
+                "description": "전적대학 교과목을 인정구분(전공기초·전공필수·전공선택·교양선택·일반선택)·대응과목코드와 함께 나열하고 인정학점 합계를 적은 문서"
+              },
+              {
+                "const": "lang_cert",
+                "description": "TOEIC·TOEIC Speaking·OPIc 같은 시험명과 점수(등급)·응시일·유효기간이 한 줄 이상 적힌 어학 성적 확인 문서"
+              },
+              {
+                "const": "capstone_result",
+                "description": "작품명·관련 교과목·심사위원별 판정과 서명, 최종 심사 결과(통과·불통과)가 적힌 졸업작품 심사 문서"
+              },
+              {
+                "const": "thesis_result",
+                "description": "논문 제목·지도교수·심사위원별 판정과 최종 판정(합격·조건부 합격·불합격)이 적힌 졸업논문 심사 문서"
+              },
+              {
+                "const": "exam_result",
+                "description": "전공종합시험(졸업시험)의 과목별 점수·평균·합격 기준·판정이 적힌 문서"
+              },
+              {
+                "const": "curriculum",
+                "description": "학과(학부)명과 적용 대상 입학연도, 이수구분별 과목코드·교과목명·학점을 나열한 교육과정표"
+              },
+              {
+                "const": "grad_rule",
+                "description": "제1조, 제2조처럼 조문으로 졸업요건을 정하고, 별표로 교육과정별 졸업 기준표와 공인어학 기준표가 붙은 시행세칙"
+              },
+              {
+                "const": "subst_table",
+                "description": "폐지과목코드와 대체과목코드를 짝지어 인정영역·적용대상을 적은 표"
+              },
+              {
+                "const": "others",
+                "description": "위 문서종에 속하지 않는 문서, parse가 불가능한 문서 포함"
+              }
+            ]
+          }
+        }
+      },
+      "customName": "paperwork_filter",
+      "split": true,
+      "splitCriteria": [
+        {
+          "criterion": "CONTINUITY",
+          "description": ""
+        }
+      ]
+    },
+    "informationExtractConfiguration": {
+      "modelName": "",
+      "schemas": [
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "Transcript",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tr_student_name": {
+                  "type": "string",
+                  "description": "이름. 성적표에 적힌 그대로 적어요. 영문 이름 뒤 괄호에 한글 이름이 있으면 괄호 안 한글만 적고, 영문 이름만 있으면 영문 그대로 적어요(한글로 옮기지 마세요)"
+                },
+                "tr_student_id": {
+                  "type": "string",
+                  "description": "학번. 숫자 10자리만 적고 이름·공백·기호는 빼주세요"
+                },
+                "tr_major": {
+                  "type": "string",
+                  "description": "주전공 소속"
+                },
+                "tr_dept": {
+                  "type": "string",
+                  "description": "소속 학과 또는 학부의 한글 이름만(예: 컴퓨터공학과, 전자공학부). 단과대학명과 '○○전공'은 빼주세요. 영문이면 한글 공식 명칭으로 바꿔 적어요: Computer Science and Engineering → 컴퓨터공학과, Korean Language and Literature → 국어국문학과, Life Science → 생명과학과, Electronic Engineering → 전자공학부, Business Administration → 경영학부, Media and Communication → 미디어커뮤니케이션학부"
+                },
+                "tr_double_major": {
+                  "type": "string",
+                  "description": "소속 칸의 '복수전공:' 뒤 학과(학부), 없으면 빈 값"
+                },
+                "tr_entry_date": {
+                  "type": "string",
+                  "description": "입학일자"
+                },
+                "tr_entry_year": {
+                  "type": "integer",
+                  "description": "입학연도 4자리 숫자(예: 2021)"
+                },
+                "tr_entry_type": {
+                  "type": "string",
+                  "description": "입학구분"
+                },
+                "tr_transfer_credits": {
+                  "type": "integer",
+                  "description": "편입 인정학점, 없으면 0"
+                },
+                "tr_total_credits": {
+                  "type": "integer",
+                  "description": "성적표에 기입된 총 취득학점"
+                },
+                "tr_gpa": {
+                  "type": "number",
+                  "description": "평점평균(4.5 만점)"
+                },
+                "tr_courses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "tr_year": {
+                        "type": "string",
+                        "description": "학년도"
+                      },
+                      "tr_term": {
+                        "type": "string",
+                        "description": "학기(1학기, 2학기, 여름 계절학기, 겨울 계절학기). 영문이면 Spring → 1학기, Fall → 2학기, Summer → 여름 계절학기, Winter → 겨울 계절학기로 바꿔 적어요"
+                      },
+                      "tr_course_code": {
+                        "type": "string",
+                        "description": "과목코드"
+                      },
+                      "tr_course_name": {
+                        "type": "string",
+                        "description": "교과목명"
+                      },
+                      "tr_category": {
+                        "type": "string",
+                        "description": "이수구분. 국문 성적표는 표기 그대로(교필, 교선, 전기, 전필, 전선, 일선, 복전) 적고, 영문이면 같은 뜻의 국문 약어로 바꿔 적어요(GE Required → 교필, GE Elective → 교선, Major Basic → 전기, Major Required → 전필, Major Elective → 전선, General Elective → 일선, Double Major → 복전)"
+                      },
+                      "tr_credit": {
+                        "type": "integer",
+                        "description": "학점"
+                      },
+                      "tr_grade": {
+                        "type": "string",
+                        "description": "성적. 성적표 표기 그대로(A+, A0, B+, B0, C+, C0, D+, D0, F, P, I)"
+                      },
+                      "tr_remark": {
+                        "type": "string",
+                        "description": "비고. 재수강, 재수강(대체), 복수전공 공통인정, 타전공 인정 신청중 등 적힌 그대로, 없으면 빈 값"
+                      }
+                    }
+                  },
+                  "description": "이수 과목 목록, 아래 항목"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "tr_student_name",
+                "source": "root"
+              },
+              {
+                "name": "tr_student_id",
+                "source": "root"
+              },
+              {
+                "name": "tr_major",
+                "source": "root"
+              },
+              {
+                "name": "tr_dept",
+                "source": "root"
+              },
+              {
+                "name": "tr_double_major",
+                "source": "root"
+              },
+              {
+                "name": "tr_entry_date",
+                "source": "root"
+              },
+              {
+                "name": "tr_entry_year",
+                "source": "root"
+              },
+              {
+                "name": "tr_entry_type",
+                "source": "root"
+              },
+              {
+                "name": "tr_transfer_credits",
+                "source": "root"
+              },
+              {
+                "name": "tr_total_credits",
+                "source": "root"
+              },
+              {
+                "name": "tr_gpa",
+                "source": "root"
+              },
+              {
+                "name": "tr_year",
+                "source": "group_table",
+                "groupTableKey": "tr_courses"
+              },
+              {
+                "name": "tr_term",
+                "source": "group_table",
+                "groupTableKey": "tr_courses"
+              },
+              {
+                "name": "tr_course_code",
+                "source": "group_table",
+                "groupTableKey": "tr_courses"
+              },
+              {
+                "name": "tr_course_name",
+                "source": "group_table",
+                "groupTableKey": "tr_courses"
+              },
+              {
+                "name": "tr_category",
+                "source": "group_table",
+                "groupTableKey": "tr_courses"
+              },
+              {
+                "name": "tr_credit",
+                "source": "group_table",
+                "groupTableKey": "tr_courses"
+              },
+              {
+                "name": "tr_grade",
+                "source": "group_table",
+                "groupTableKey": "tr_courses"
+              },
+              {
+                "name": "tr_remark",
+                "source": "group_table",
+                "groupTableKey": "tr_courses"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "transfer_credit",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tc_student_id": {
+                  "type": "string",
+                  "description": "학번. 숫자 10자리만 적고 이름·공백·기호는 빼주세요"
+                },
+                "tc_prev_school": {
+                  "type": "string",
+                  "description": "전적대학, 학과"
+                },
+                "tc_total_credits": {
+                  "type": "integer",
+                  "description": "합계 칸의 숫자(한도 적용 전 합계)"
+                },
+                "tc_recognized_credits": {
+                  "type": "integer",
+                  "description": "한도 적용 후 실제 인정학점. 합계 칸에 '65학점 인정'처럼 적혀 있으면 그 값, 없으면 합계와 같은 값"
+                },
+                "tc_rows": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "tc_prev_course": {
+                        "type": "string",
+                        "description": "전적대 교과목 명"
+                      },
+                      "tc_credit": {
+                        "type": "integer",
+                        "description": "학점"
+                      },
+                      "tc_category": {
+                        "type": "string",
+                        "description": "인정구분. 적힌 그대로(교양선택, 전공기초, 전공필수, 전공선택, 전공, 일반선택). '전공'은 세부 영역이 정해지지 않은 경우"
+                      },
+                      "tc_mapped_code": {
+                        "type": "string",
+                        "description": "대응과목코드, 미지정이면 “-”"
+                      },
+                      "tc_remark": {
+                        "type": "string",
+                        "description": "비고"
+                      }
+                    }
+                  },
+                  "description": "인정 내역, 아래 항목"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "tc_student_id",
+                "source": "root"
+              },
+              {
+                "name": "tc_prev_school",
+                "source": "root"
+              },
+              {
+                "name": "tc_total_credits",
+                "source": "root"
+              },
+              {
+                "name": "tc_recognized_credits",
+                "source": "root"
+              },
+              {
+                "name": "tc_prev_course",
+                "source": "group_table",
+                "groupTableKey": "tc_rows"
+              },
+              {
+                "name": "tc_credit",
+                "source": "group_table",
+                "groupTableKey": "tc_rows"
+              },
+              {
+                "name": "tc_category",
+                "source": "group_table",
+                "groupTableKey": "tc_rows"
+              },
+              {
+                "name": "tc_mapped_code",
+                "source": "group_table",
+                "groupTableKey": "tc_rows"
+              },
+              {
+                "name": "tc_remark",
+                "source": "group_table",
+                "groupTableKey": "tc_rows"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "lang_cert",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "lang_student_id": {
+                  "type": "string",
+                  "description": "학번. 숫자 10자리만 적고 이름·공백·기호는 빼주세요"
+                },
+                "lang_student_name": {
+                  "type": "string",
+                  "description": "성명"
+                },
+                "lang_tests": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "lang_test_name": {
+                        "type": "string",
+                        "description": "시험명(TOEIC, TOEIC Speaking, OPIc)"
+                      },
+                      "lang_score": {
+                        "type": "number",
+                        "description": "점수 숫자만. OPIc처럼 점수가 없으면 빈 값"
+                      },
+                      "lang_level": {
+                        "type": "string",
+                        "description": "등급. OPIc 등급 또는 TOEIC Speaking 괄호 안 등급(예: IM2), TOEIC은 빈 값"
+                      },
+                      "lang_test_date": {
+                        "type": "string",
+                        "description": "응시일. YYYY-MM-DD 형식"
+                      },
+                      "lang_valid_until": {
+                        "type": "integer",
+                        "description": "성적 유효기간의 마지막 날을 YYYYMMDD 8자리 숫자로. '○○ 전일까지'로 적혀 있으면 그 하루 전 날짜(예: 2027.08.23 전일까지 → 20270822)"
+                      }
+                    }
+                  },
+                  "description": "제출 성적 표의 한 줄씩, 아래 항목"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "lang_student_id",
+                "source": "root"
+              },
+              {
+                "name": "lang_student_name",
+                "source": "root"
+              },
+              {
+                "name": "lang_test_name",
+                "source": "group_table",
+                "groupTableKey": "lang_tests"
+              },
+              {
+                "name": "lang_score",
+                "source": "group_table",
+                "groupTableKey": "lang_tests"
+              },
+              {
+                "name": "lang_level",
+                "source": "group_table",
+                "groupTableKey": "lang_tests"
+              },
+              {
+                "name": "lang_test_date",
+                "source": "group_table",
+                "groupTableKey": "lang_tests"
+              },
+              {
+                "name": "lang_valid_until",
+                "source": "group_table",
+                "groupTableKey": "lang_tests"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "capstone_result",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cap_student_id": {
+                  "type": "string",
+                  "description": "학번. 숫자 10자리만 적고 이름·공백·기호는 빼주세요"
+                },
+                "cap_student_name": {
+                  "type": "string",
+                  "description": "성명"
+                },
+                "cap_title": {
+                  "type": "string",
+                  "description": "작품명"
+                },
+                "cap_review_date": {
+                  "type": "string",
+                  "description": "심사일. YYYY-MM-DD 형식"
+                },
+                "cap_result": {
+                  "type": "string",
+                  "description": "최종 심사 결과(통과, 불통과)"
+                },
+                "cap_pass_count": {
+                  "type": "integer",
+                  "description": "'통과' 판정을 한 심사위원 수"
+                },
+                "cap_member_count": {
+                  "type": "integer",
+                  "description": "심사위원 표에 적힌 심사위원 수"
+                },
+                "cap_signed_count": {
+                  "type": "integer",
+                  "description": "심사위원 표 서명 칸에 '(서명)'이 적힌 사람 수. 빈 칸은 세지 마세요"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "cap_student_id",
+                "source": "root"
+              },
+              {
+                "name": "cap_student_name",
+                "source": "root"
+              },
+              {
+                "name": "cap_title",
+                "source": "root"
+              },
+              {
+                "name": "cap_review_date",
+                "source": "root"
+              },
+              {
+                "name": "cap_result",
+                "source": "root"
+              },
+              {
+                "name": "cap_pass_count",
+                "source": "root"
+              },
+              {
+                "name": "cap_member_count",
+                "source": "root"
+              },
+              {
+                "name": "cap_signed_count",
+                "source": "root"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "thesis_result",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "th_student_id": {
+                  "type": "string",
+                  "description": "학번. 숫자 10자리만 적고 이름·공백·기호는 빼주세요"
+                },
+                "th_student_name": {
+                  "type": "string",
+                  "description": "성명"
+                },
+                "th_title": {
+                  "type": "string",
+                  "description": "논문 제목"
+                },
+                "th_review_date": {
+                  "type": "string",
+                  "description": "심사일. YYYY-MM-DD 형식"
+                },
+                "th_result": {
+                  "type": "string",
+                  "description": "최종 판정 칸 그대로(합격, 조건부 합격, 불합격)"
+                },
+                "th_condition": {
+                  "type": "string",
+                  "description": "조건 칸 내용(재제출 기한 등), 없으면 빈 값"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "th_student_id",
+                "source": "root"
+              },
+              {
+                "name": "th_student_name",
+                "source": "root"
+              },
+              {
+                "name": "th_title",
+                "source": "root"
+              },
+              {
+                "name": "th_review_date",
+                "source": "root"
+              },
+              {
+                "name": "th_result",
+                "source": "root"
+              },
+              {
+                "name": "th_condition",
+                "source": "root"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "exam_result",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ex_student_id": {
+                  "type": "string",
+                  "description": "학번. 숫자 10자리만 적고 이름·공백·기호는 빼주세요"
+                },
+                "ex_student_name": {
+                  "type": "string",
+                  "description": "성명"
+                },
+                "ex_exam_date": {
+                  "type": "string",
+                  "description": "시행일. YYYY-MM-DD 형식"
+                },
+                "ex_average": {
+                  "type": "number",
+                  "description": "평균 칸의 숫자"
+                },
+                "ex_result": {
+                  "type": "string",
+                  "description": "판정 칸 그대로(합격, 불합격, 불합격(과락))"
+                },
+                "ex_subjects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ex_subject": {
+                        "type": "string",
+                        "description": "과목명"
+                      },
+                      "ex_score": {
+                        "type": "integer",
+                        "description": "점수(100점 만점)"
+                      }
+                    }
+                  },
+                  "description": "과목별 성적 표의 한 줄씩(평균 줄은 빼주세요), 아래 항목"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "ex_student_id",
+                "source": "root"
+              },
+              {
+                "name": "ex_student_name",
+                "source": "root"
+              },
+              {
+                "name": "ex_exam_date",
+                "source": "root"
+              },
+              {
+                "name": "ex_average",
+                "source": "root"
+              },
+              {
+                "name": "ex_result",
+                "source": "root"
+              },
+              {
+                "name": "ex_subject",
+                "source": "group_table",
+                "groupTableKey": "ex_subjects"
+              },
+              {
+                "name": "ex_score",
+                "source": "group_table",
+                "groupTableKey": "ex_subjects"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "curriculum",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cur_dept": {
+                  "type": "string",
+                  "description": "제목의 학과(학부)명만(예: 전자공학부)"
+                },
+                "cur_version": {
+                  "type": "string",
+                  "description": "교육과정 연도(2019, 2023 등)"
+                },
+                "cur_applies_to": {
+                  "type": "string",
+                  "description": "적용대상(예: 2019~2022학년도 입학(편입)자)"
+                },
+                "cur_courses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "cur_category": {
+                        "type": "string",
+                        "description": "이수구분(교양필수, 전공기초, 전공필수, 전공선택)"
+                      },
+                      "cur_course_code": {
+                        "type": "string",
+                        "description": "과목코드"
+                      },
+                      "cur_course_name": {
+                        "type": "string",
+                        "description": "교과목명"
+                      },
+                      "cur_credit": {
+                        "type": "integer",
+                        "description": "학점"
+                      },
+                      "cur_note": {
+                        "type": "string",
+                        "description": "비고"
+                      }
+                    }
+                  },
+                  "description": "과목 목록, 아래 항목"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "cur_dept",
+                "source": "root"
+              },
+              {
+                "name": "cur_version",
+                "source": "root"
+              },
+              {
+                "name": "cur_applies_to",
+                "source": "root"
+              },
+              {
+                "name": "cur_category",
+                "source": "group_table",
+                "groupTableKey": "cur_courses"
+              },
+              {
+                "name": "cur_course_code",
+                "source": "group_table",
+                "groupTableKey": "cur_courses"
+              },
+              {
+                "name": "cur_course_name",
+                "source": "group_table",
+                "groupTableKey": "cur_courses"
+              },
+              {
+                "name": "cur_credit",
+                "source": "group_table",
+                "groupTableKey": "cur_courses"
+              },
+              {
+                "name": "cur_note",
+                "source": "group_table",
+                "groupTableKey": "cur_courses"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "grad_rule",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rule_dept": {
+                  "type": "string",
+                  "description": "제목의 학과(학부)명만(예: 전자공학부)"
+                },
+                "rule_min_gpa": {
+                  "type": "number",
+                  "description": "[별표1]의 평점평균 기준(4.5 만점). 2019·2023 교육과정이 같으면 그 값"
+                },
+                "rule_ge_req_credits": {
+                  "type": "integer",
+                  "description": "교양필수 학점(제4조)"
+                },
+                "rule_ge_sel_credits": {
+                  "type": "integer",
+                  "description": "제4조의 교양선택 최소학점"
+                },
+                "rule_lang_required": {
+                  "type": "string",
+                  "description": "공인어학 요건이 있으면 '있음', '요건을 두지 아니한다'·'해당 없음'이면 '없음'"
+                },
+                "rule_lang_toeic": {
+                  "type": "integer",
+                  "description": "[별표2] TOEIC 기준 점수 숫자, 해당 없으면 빈 값"
+                },
+                "rule_lang_ts": {
+                  "type": "integer",
+                  "description": "[별표2] TOEIC Speaking 기준 점수 숫자(괄호 안 등급은 빼고), 해당 없으면 빈 값"
+                },
+                "rule_lang_opic": {
+                  "type": "string",
+                  "description": "[별표2] OPIc 기준 등급(예: IM2), 해당 없으면 빈 값"
+                },
+                "rule_lang_valid_years": {
+                  "type": "integer",
+                  "description": "공인어학 성적 유효기간(년 단위 숫자), 어학 요건이 없으면 빈 값"
+                },
+                "rule_cert_types": {
+                  "type": "string",
+                  "description": "제5조 ②의 졸업인증 종류를 쉼표로(졸업작품, 졸업논문, 졸업시험 중 적힌 것)"
+                },
+                "rule_cert_mode": {
+                  "type": "string",
+                  "description": "제5조 ②에 '택1' 또는 '중 하나'가 있으면 '택1', 아니면 '필수'"
+                },
+                "rule_double_major_cap": {
+                  "type": "integer",
+                  "description": "복수전공 공통인정 과목을 주전공 전공학점에 넣을 수 있는 최대 학점"
+                },
+                "rule_transfer_max_credits": {
+                  "type": "integer",
+                  "description": "편입 인정 최대 학점"
+                },
+                "rule_transfer_ge_exempt": {
+                  "type": "string",
+                  "description": "편입생 교양필수 면제 여부(면제 / 미면제)"
+                },
+                "rule_base_date": {
+                  "type": "integer",
+                  "description": "졸업사정 기준일을 YYYYMMDD 8자리 숫자로(예: 20270115)"
+                },
+                "rule_by_version": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "rv_version": {
+                        "type": "string",
+                        "description": "교육과정 연도 숫자만(2019, 2023)"
+                      },
+                      "rv_total": {
+                        "type": "integer",
+                        "description": "총 취득학점"
+                      },
+                      "rv_ge_sel": {
+                        "type": "integer",
+                        "description": "교양선택 학점"
+                      },
+                      "rv_base": {
+                        "type": "integer",
+                        "description": "전공기초 학점, 열이 없으면 0"
+                      },
+                      "rv_major_req": {
+                        "type": "integer",
+                        "description": "전공필수 학점"
+                      },
+                      "rv_major_sel": {
+                        "type": "integer",
+                        "description": "전공선택 학점"
+                      },
+                      "rv_min_gpa": {
+                        "type": "number",
+                        "description": "평점평균 기준(4.5 만점)"
+                      }
+                    }
+                  },
+                  "description": "[별표1] 교육과정별 졸업 기준 표의 한 줄씩, 아래 항목"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "rule_dept",
+                "source": "root"
+              },
+              {
+                "name": "rule_min_gpa",
+                "source": "root"
+              },
+              {
+                "name": "rule_ge_req_credits",
+                "source": "root"
+              },
+              {
+                "name": "rule_ge_sel_credits",
+                "source": "root"
+              },
+              {
+                "name": "rule_lang_required",
+                "source": "root"
+              },
+              {
+                "name": "rule_lang_toeic",
+                "source": "root"
+              },
+              {
+                "name": "rule_lang_ts",
+                "source": "root"
+              },
+              {
+                "name": "rule_lang_opic",
+                "source": "root"
+              },
+              {
+                "name": "rule_lang_valid_years",
+                "source": "root"
+              },
+              {
+                "name": "rule_cert_types",
+                "source": "root"
+              },
+              {
+                "name": "rule_cert_mode",
+                "source": "root"
+              },
+              {
+                "name": "rule_double_major_cap",
+                "source": "root"
+              },
+              {
+                "name": "rule_transfer_max_credits",
+                "source": "root"
+              },
+              {
+                "name": "rule_transfer_ge_exempt",
+                "source": "root"
+              },
+              {
+                "name": "rule_base_date",
+                "source": "root"
+              },
+              {
+                "name": "rv_version",
+                "source": "group_table",
+                "groupTableKey": "rule_by_version"
+              },
+              {
+                "name": "rv_total",
+                "source": "group_table",
+                "groupTableKey": "rule_by_version"
+              },
+              {
+                "name": "rv_ge_sel",
+                "source": "group_table",
+                "groupTableKey": "rule_by_version"
+              },
+              {
+                "name": "rv_base",
+                "source": "group_table",
+                "groupTableKey": "rule_by_version"
+              },
+              {
+                "name": "rv_major_req",
+                "source": "group_table",
+                "groupTableKey": "rule_by_version"
+              },
+              {
+                "name": "rv_major_sel",
+                "source": "group_table",
+                "groupTableKey": "rule_by_version"
+              },
+              {
+                "name": "rv_min_gpa",
+                "source": "group_table",
+                "groupTableKey": "rule_by_version"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "subst_table",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sub_major": {
+                  "type": "string",
+                  "description": "대체과목 인정대상 학과"
+                },
+                "sub_rows": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "sub_old_code": {
+                        "type": "string",
+                        "description": "폐지과목코드"
+                      },
+                      "sub_old_name": {
+                        "type": "string",
+                        "description": "폐지과목명"
+                      },
+                      "sub_abolished_year": {
+                        "type": "string",
+                        "description": "폐지연도"
+                      },
+                      "sub_new_code": {
+                        "type": "string",
+                        "description": "대체과목코드"
+                      },
+                      "sub_new_name": {
+                        "type": "string",
+                        "description": "대체과목명"
+                      },
+                      "sub_category": {
+                        "type": "string",
+                        "description": "인정영역"
+                      },
+                      "sub_applies_to": {
+                        "type": "string",
+                        "description": "적용대상"
+                      }
+                    }
+                  },
+                  "description": "대체 목록, 아래 항목"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "sub_major",
+                "source": "root"
+              },
+              {
+                "name": "sub_old_code",
+                "source": "group_table",
+                "groupTableKey": "sub_rows"
+              },
+              {
+                "name": "sub_old_name",
+                "source": "group_table",
+                "groupTableKey": "sub_rows"
+              },
+              {
+                "name": "sub_abolished_year",
+                "source": "group_table",
+                "groupTableKey": "sub_rows"
+              },
+              {
+                "name": "sub_new_code",
+                "source": "group_table",
+                "groupTableKey": "sub_rows"
+              },
+              {
+                "name": "sub_new_name",
+                "source": "group_table",
+                "groupTableKey": "sub_rows"
+              },
+              {
+                "name": "sub_category",
+                "source": "group_table",
+                "groupTableKey": "sub_rows"
+              },
+              {
+                "name": "sub_applies_to",
+                "source": "group_table",
+                "groupTableKey": "sub_rows"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        },
+        {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "others",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "others_title": {
+                  "type": "string",
+                  "description": "문서 제목"
+                }
+              }
+            }
+          },
+          "mode": "standard",
+          "modelName": "",
+          "schemaLayout": {
+            "version": 1,
+            "columns": [
+              {
+                "name": "others_title",
+                "source": "root"
+              }
+            ]
+          },
+          "location": false,
+          "manyRows": true,
+          "manyRowsThreshold": 50,
+          "manyRowsMaxRowsPerBatch": 400,
+          "manyRowsMaxConcurrent": 5
+        }
+      ],
+      "categorySchemaMapping": {
+        "transcript": "Transcript",
+        "transfer_credit": "transfer_credit",
+        "lang_cert": "lang_cert",
+        "capstone_result": "capstone_result",
+        "thesis_result": "thesis_result",
+        "exam_result": "exam_result",
+        "curriculum": "curriculum",
+        "grad_rule": "grad_rule",
+        "subst_table": "subst_table",
+        "others": "others"
+      }
+    },
+    "instructConfiguration": {
+      "nodes": [
+        {
+          "name": "판정",
+          "modelName": "",
+          "prompt": "학생 한 명의 졸업요건을 사정해주세요. 아래 [작업 1]~[작업 4]를 순서대로 모두 적은 뒤, 맨 마지막에 판정을 정해주세요. 판정을 먼저 정해놓고 숫자를 거기에 맞추면 안 돼요. 문서에 없는 값은 지어내지 말고 \"값 없음\"으로 적어주세요.\n\n\n\n\n\n\n\n[참고할 값]\n\n\n\n- 성적표: {{tr_student_id}}, {{tr_student_name}}, {{tr_dept}}, {{tr_entry_year}}, {{tr_entry_type}}, {{tr_total_credits}}, {{tr_gpa}}, {{tr_transfer_credits}}, {{tr_courses}}\n\n\n\n- 교육과정표: {{cur_dept}}, {{cur_version}}, {{cur_courses}}\n\n\n\n- 대체과목표: {{sub_rows}}\n\n\n\n- 학점인정 확인서(편입생만 있어요): {{tc_rows}}\n\n\n\n- 어학: {{lang_student_name}}, {{lang_tests}}\n\n\n\n- 졸업작품: {{cap_student_name}}, {{cap_result}}, {{cap_signed_count}}, {{cap_member_count}}\n\n\n\n- 졸업논문: {{th_student_name}}, {{th_result}}\n\n\n\n- 졸업시험: {{ex_student_name}}, {{ex_subjects}}, {{ex_average}}, {{ex_result}}\n\n\n\n- 시행세칙: {{rule_dept}}, {{rule_by_version}}, {{rule_lang_required}}, {{rule_lang_toeic}}, {{rule_lang_ts}}, {{rule_lang_opic}}, {{rule_cert_types}}, {{rule_cert_mode}}, {{rule_double_major_cap}}, {{rule_base_date}}\n\n\n\n- 기타 문서(9종이 아닌 문서. 판정에는 쓰지 않고 [제외 서류]에만 옮겨요): {{others_title}}\n\n\n\n\n\n\n\n[작업 1] 기준 정하기\n\n\n\n- 입학연도({{tr_entry_year}})가 2022 이하면 2019 교육과정, 2023 이상이면 2023 교육과정이에요. 편입생도 똑같아요.\n\n\n\n- {{rule_by_version}}에서 고른 판의 줄을 찾아 기준값 6개를 적어주세요. 총학점 rv_total, 교양선택 rv_ge_sel, 전공기초 rv_base, 전공필수 rv_major_req, 전공선택 rv_major_sel, 평점 rv_min_gpa예요.\n\n\n\n- 교육과정표는 고른 판({{cur_version}}) 하나만 봐요. 거기서 교양필수, 전공기초, 전공필수 과목코드 목록을 적어주세요. 전공선택 목록은 안 적어도 돼요.\n\n\n\n\n\n\n\n[작업 2] 과목 정리\n\n\n\n{{tr_courses}}의 과목을 하나도 빠짐없이 한 번씩, \"제외\"와 \"인정\" 중 한 곳에 넣어주세요.\n\n\n\n- 제외: ① 성적이 F인 과목 ② 성적이 I인 과목(\"미확정\"이라고 따로 표시해요) ③ 같은 과목코드가 여러 번 있으면 마지막 것을 뺀 앞의 것 ④ 비고가 \"재수강(대체)\"인 과목이 있으면, {{sub_rows}}에서 그 과목이 sub_new_code인 행의 sub_old_code 과목\n\n\n\n- 인정: 나머지 전부예요. 성적표 이수구분(tr_category) 그대로 교필, 교선, 전기, 전필, 전선, 일선, 복전으로 나눠요. 교육과정표에 있는지는 여기서 따지지 않아요. P 성적도 학점에 넣어요.\n\n\n\n이수구분마다 한 과목씩 누적 합계를 붙여 적어주세요.\n\n\n\n예) 전선: ABC2001 3 (누적 3), ABC3005 3 (누적 6), ABC4001 2 (누적 8) → 3과목 8학점\n\n\n\n검산: 교필 + 교선 + 전기 + 전필 + 전선 + 일선 + 복전 + 편입 인정학점({{tr_transfer_credits}}, 없으면 0)이 {{tr_total_credits}}와 같아야 해요. 다르면 빠뜨리거나 두 번 넣은 과목을 찾아 처음부터 다시 세어주세요. 합을 맞추려고 아무 영역 숫자나 바꾸면 안 돼요. 다시 세어도 다르면 교필·교선·전기·전필·전선을 한 번 더 확인하고, 남는 차이는 일선에서 난 것으로 보고 \"검산 차이 n학점(일선)\"이라고 적어요. 일선은 요건에 쓰지 않으니 검산 차이만으로 결과를 바꾸지 않아요. 총학점은 성적표의 {{tr_total_credits}}를 써요.\n\n\n\n\n\n\n\n[작업 3] 영역별 결과\n\n\n\n10개 영역마다 결과를 충족, 확인 필요, 부족, 해당 없음 중 하나만 골라요. 아래 기준 말고 다른 이유로 결과를 바꾸면 안 돼요. 결과는 괄호 안에 적은 이유와 맞아야 해요(이유에 문제가 없다고 적었으면 충족이에요).\n\n\n\n1. 교양필수: 편입생({{tr_entry_type}}에 \"편입\"이 있으면)은 해당 없음. 아니면 교양필수 목록이 인정 과목에 다 있으면 충족, 빠진 게 있으면 부족.\n\n\n\n2. 교양선택: 교선 합계 + {{tc_rows}} 중 인정구분이 교양선택인 학점이 rv_ge_sel 이상이면 충족, 아니면 부족.\n\n\n\n3. 전공기초: rv_base가 0이면 해당 없음. 아니면 전공기초 목록이 인정 과목이나 {{tc_rows}}의 대응과목코드(tc_mapped_code)에 다 있으면 충족, 빠진 게 있으면 부족.\n\n\n\n4. 전공필수: 목록의 과목이 인정 과목이나 tc_mapped_code에 있으면 이수예요. 없는 과목은 아래 순서로 봐요.\n\n\n\n   ① {{sub_rows}}에 그 과목이 sub_old_code인 행이 있고, 그 행의 sub_new_code가 인정 과목에 있고, 학생 입학연도가 sub_applies_to에 해당하면 → 이수\n\n\n\n   ② {{tc_rows}}에 대응과목코드가 \"-\"이고 인정구분이 \"전공\"인 행이 하나라도 있으면 → 확인 필요. 그 행의 과목명이 빠진 과목과 같은지, 그 과목으로 볼 근거가 있는지는 따지지 않아요. 대응과목을 정하는 건 학과의 일이라서, 이 경우에는 부족으로 정하지 않아요.\n\n\n\n   ③ ①도 ②도 아니면 → 부족. 이름이 비슷한 과목이 있어도 대체과목표에 없으면 이수가 아니에요. ②에 해당하면 ③은 보지 않아요.\n\n\n\n   전부 이수면 충족이에요.\n\n\n\n5. 전공선택: A와 B를 계산해요.\n\n\n\n   - 초과분 = 비고가 \"복수전공 공통인정\"인 인정 과목 학점 합 − {{rule_double_major_cap}} (0보다 작으면 0)\n\n\n\n   - A = 전선 합계 + {{tc_rows}} 중 인정구분이 전공선택인 학점 − 비고가 \"타전공 인정 신청중\"인 과목 학점 − 초과분\n\n\n\n   - B = 비고가 \"타전공 인정 신청중\"인 과목 학점 + 미확정(I) 과목 중 이수구분이 전선인 학점\n\n\n\n   A가 rv_major_sel 이상이면 충족, A는 모자라도 A+B가 rv_major_sel 이상이면 확인 필요, A+B도 모자라면 부족.\n\n\n\n6. 총학점: {{tr_total_credits}}가 rv_total 이상이면 충족. 모자라도 미확정(I) 과목 학점을 더하면 넘으면 확인 필요, 그래도 모자라면 부족.\n\n\n\n7. 평점: {{tr_gpa}}가 rv_min_gpa 이상이면 충족, 아니면 부족.\n\n\n\n8. 어학: {{rule_lang_required}}가 \"없음\"이면 해당 없음이에요(낸 성적이 있어도 안 봐요). {{lang_tests}} 중 공인 시험(TOEIC, TOEIC Speaking, OPIc) 성적만 봐요. 모의고사·교내 시험 성적이나 [제외 서류]에 적힌 문서의 점수는 쓰지 않아요. \"있음\"인데 {{lang_tests}}가 비어 있으면 확인 필요. 성적이 있으면 한 줄씩 아래 둘을 보고, 둘 다 맞는 성적이 하나라도 있으면 충족, 하나도 없으면 부족.\n\n\n\n   ① 기준: TOEIC은 lang_score ≥ {{rule_lang_toeic}}, TOEIC Speaking은 lang_score ≥ {{rule_lang_ts}}, OPIc은 lang_level이 {{rule_lang_opic}}과 같거나 높아야 해요. OPIc 순서는 NL < NM < NH < IL < IM1 < IM2 < IM3 < IH < AL이에요.\n\n\n\n   ② 유효기간: lang_valid_until ≥ {{rule_base_date}}\n\n\n\n9. 졸업인증: {{rule_cert_types}}에 있는 종류의 서류만 보고, 서류마다 통과, 확인 필요, 불합격을 정해요.\n\n\n\n   - 졸업작품: {{cap_result}}가 \"통과\"이고 {{cap_signed_count}}와 {{cap_member_count}}가 같으면 통과, \"통과\"인데 서명 수가 모자라면 확인 필요, 그 밖에는 불합격\n\n\n\n   - 졸업논문: {{th_result}}가 \"합격\"이면 통과, \"조건부 합격\"이면 확인 필요, 그 밖에는 불합격\n\n\n\n   - 졸업시험: {{ex_result}}가 \"합격\"이고 {{ex_average}}가 60 이상, {{ex_subjects}} 점수가 모두 40 이상이면 통과, 아니면 불합격\n\n\n\n   통과한 서류로 요건을 채우면({{rule_cert_mode}}가 \"택1\"이면 1개, \"필수\"면 적힌 종류 전부) 충족이에요. 택1에서 안 낸 다른 종류는 신경 쓰지 않아요. 못 채웠는데 확인 필요인 서류가 있거나 인정 종류 서류가 하나도 없으면 확인 필요, 그 밖에는 부족이에요.\n\n\n\n10. 서류 확인: 아래 중 하나라도 있으면 확인 필요, 없으면 충족이에요.\n\n\n\n   - {{tr_dept}}와 {{rule_dept}}가 다름\n\n\n\n   - {{lang_student_name}}, {{cap_student_name}}, {{th_student_name}}, {{ex_student_name}} 중 값이 있는 것이 {{tr_student_name}}과 다름(개명 등). 한쪽이 영문, 다른 쪽이 한글이면 영문이 그 한글 이름을 로마자로 옮긴 것으로 읽힐 때 같은 이름으로 봐요(예: HONG GILDONG = 홍길동).\n\n\n\n\n\n\n\n\n\n[빠진 서류]\n\n\n\n제출되지 않은 서류를 아래 조건으로만 찾아요. 값이 무엇이든 적혀 있으면 낸 거예요. 서류는 있는데 불합격, 조건부 합격, 서명 공란, 성명 불일치인 경우는 빠진 게 아니에요.\n\n\n\n- 성적증명서: {{tr_student_id}}가 비어 있음\n\n\n\n- 졸업요건 시행세칙: {{rule_dept}}가 비어 있음\n\n\n\n- 교육과정표: {{cur_version}}이 비어 있음\n\n\n\n- 대체과목 인정표: {{sub_rows}}가 비어 있음\n\n\n\n- 공인어학성적 제출확인서: {{rule_lang_required}}가 \"있음\"이고 {{lang_tests}}가 비어 있음\n\n\n\n- 졸업인증 서류: {{rule_cert_types}}에 있는 종류만 봐요. 졸업작품은 {{cap_result}}, 졸업논문은 {{th_result}}, 졸업시험은 {{ex_result}}에 값이 있으면 낸 거예요(불합격이어도 낸 거예요).\n\n\n\n   · {{rule_cert_mode}}가 \"택1\"이면: 인정 종류 중 하나라도 냈으면 빠진 졸업인증 서류는 없어요. 안 낸 다른 종류를 적으면 안 돼요. 인정 종류를 하나도 안 냈을 때만 인정 종류 이름을 모두 적어요.\n\n\n\n   · {{rule_cert_mode}}가 \"필수\"면: 안 낸 종류를 적어요.\n\n\n\n   · 이름은 \"졸업작품 심사결과 확인서\", \"졸업논문 심사결과 확인서\", \"졸업시험 성적확인서\"예요.\n\n\n\n- 편입학 학점인정 확인서: {{tr_entry_type}}에 \"편입\"이 있고 {{tc_rows}}가 비어 있음\n\n\n\n- 다 찾은 뒤 [작업 3]과 맞춰 봐요. 졸업인증이 충족이나 부족이면 졸업인증 서류는, 어학이 충족이나 부족이면 공인어학성적 제출확인서는 빠진 서류가 아니에요(서류가 있어서 결과를 정한 거예요). 이렇게 맞지 않는 서류는 지워요.\n\n\n\n\n\n\n\n[제외 서류]\n\n\n\n9종(성적증명서, 편입학 학점인정 확인서, 공인어학성적 제출확인서, 졸업작품 심사결과 확인서, 졸업논문 심사결과 확인서, 졸업시험 성적확인서, 교육과정표, 졸업요건 시행세칙, 대체과목 인정표)으로 분류되지 않은 문서를 결과에 알리려고 적는 항목이에요. 여기 적은 문서는 [작업 1]~[작업 4]와 [빠진 서류]에 쓰지 않아요.\n\n\n\n- {{others_title}}에 들어 있는 문서마다 들어온 순서대로 한 줄씩 \"- 분류 | 제목\"으로 적어요.\n\n\n\n- 분류: 제목을 읽을 수 있으면 \"양식 외\", 제목이 비어 있거나 \"값 없음\"이거나 뜻을 알 수 없는 글자뿐이면 \"미인식\"이에요.\n\n\n\n- 제목: 문서에 적힌 그대로 옮겨요. 줄바꿈은 빼고, 글자마다 띄어 쓴 제목(예: \"재 학 증 명 서\")은 붙여 적어요. 미인식이면 \"제목 없음\"이라고 적어요.\n\n\n\n- 제목이 9종 서류와 비슷해 보여도 여기 들어온 문서는 제외 서류예요. 이 문서의 점수, 과목, 결과, 날짜는 어떤 영역에도 쓰지 않아요.\n\n\n\n- {{others_title}}이 비어 있으면 \"없음\"이에요.\n\n\n\n\n\n\n\n[작업 4] 판정\n\n\n\n- [제외 서류]는 판정에 쓰지 않아요. 아래 규칙만 봐요.\n\n\n\n- [빠진 서류]가 하나라도 있으면 다른 결과와 상관없이 \"확인 필요\"\n\n\n\n- 부족이 하나라도 있으면 \"졸업 요건 부족\"\n\n\n\n- 부족은 없고 확인 필요가 하나라도 있으면 \"확인 필요\"\n\n\n\n- 모두 충족이나 해당 없음이면 \"졸업 가능\"\n\n\n\n\n\n\n\n[답변 형식]\n\n\n\n학생: 이름(학번), 학과, 적용 교육과정 — 이름과 학번은 성적표에 적힌 그대로 적어요\n\n\n\n[작업 1] 기준값 6개, 교양필수·전공기초·전공필수 목록\n\n\n\n[작업 2] 제외 목록(이유), 이수구분별 누적 목록, 검산 줄\n\n\n\n[작업 3] 10개 영역을 한 줄씩 \"영역: 이수/기준 - 결과 (이유)\"로 적어요. 전공선택은 \"A + B = 합 / 기준\"으로 적어요.\n\n\n\n부족한 항목: [작업 3]에서 부족인 영역만 그대로 옮겨요. 없으면 \"없음\"\n\n\n\n확인 필요 항목: [작업 3]에서 확인 필요인 영역만 그대로 옮겨요. 없으면 \"없음\"\n\n\n\n빠진 서류: [빠진 서류]에서 찾은 서류 이름을 쉼표로 이어 적어요. 없으면 \"없음\"\n\n\n\n제외 서류: [제외 서류]에서 적은 줄을 이 줄 아래에 그대로 옮겨요. 없으면 \"제외 서류: 없음\"\n\n\n\n판정: ([[졸업 가능]] / [[확인 필요]] / [[졸업 요건 부족]])",
+          "enumEnabled": true,
+          "enumValues": [
+            "졸업 가능",
+            "확인 필요",
+            "졸업 요건 부족"
+          ]
+        },
+        {
+          "name": "결과_json변환",
+          "modelName": "",
+          "prompt": "앞 단계 '판정' 노드의 결과를 정답지 형식의 JSON으로 옮겨 적어주세요. 판정을 다시 하지 말고, 판정 결과에 적힌 결론과 숫자만 옮겨요.\n\n\n\n[꼭 지킬 것]\n\n1. 출력은 아래 [틀]과 같은 JSON 객체 하나뿐이에요. 첫 글자는 {, 마지막 글자는 }예요. 그 앞뒤에 설명, 주의 문구, 코드블록(```)을 붙이지 않아요.\n\n2. 키 6개(student_id, applicant_name, decision, reason, missing_documents, excluded_files)를 항상 [틀]의 순서대로 모두 적어요. 값을 정할 근거가 없으면 [틀]의 기본값을 그대로 둬요. 어떤 경우에도 키를 빼지 않아요.\n\n3. 판정 결과에 없는 내용은 쓰지 않아요. 모르는 값을 추측해서 채우지 않아요.\n\n4. \"제외 서류:\" 줄이 \"없음\"이거나 그 줄이 없으면 excluded_files는 []예요. 제외 서류가 없다는 말은 어디에도 적지 않아요.\n\n\n\n[틀]\n\n{\"student_id\": \"\", \"applicant_name\": \"\", \"decision\": \"\", \"reason\": \"\", \"missing_documents\": [], \"excluded_files\": []}\n\n\n\n[참고할 값]\n\n- 판정 결과: 앞 단계 '판정' 노드가 쓴 내용 전체예요. \"학생:\" 줄, [작업 1]~[작업 3], \"빠진 서류:\" 줄, \"제외 서류:\" 줄과 그 아래 \"- 분류 | 제목\" 줄들, \"판정:\" 줄이 들어 있어요.\n\n\n\n[키별 규칙]\n\n1. student_id: \"학생:\" 줄의 학번을 숫자 10자리 문자열로 적어요. 학번이 없거나 \"값 없음\"이면 \"\"예요.\n\n2. applicant_name: \"학생:\" 줄의 이름을 적어요. 없거나 \"값 없음\"이면 \"\"예요.\n\n3. decision: \"판정:\" 줄의 값을 \"졸업 가능\", \"졸업 요건 부족\", \"확인 필요\" 중 하나로 띄어쓰기까지 똑같이 적어요. 판정이 없거나 셋 중 하나가 아니면 \"확인 필요\"예요. missing_documents가 비어 있지 않으면 판정과 상관없이 \"확인 필요\"예요.\n\n4. reason: 한국어 1~2문장으로, 줄바꿈 없이, 아래 형식에 있는 항목만 적어요. 판정 결과에서 찾을 수 없는 항목은 그 항목째 빼요. 유효기간 날짜, 과목별 점수, 서명 수, 기준일처럼 형식에 없는 세부 값은 넣지 않아요.\n\n   - 졸업 가능: \"필요 서류 완비, 학번 일치. 모든 요건 충족 — {교육과정} 교육과정 기준 총 {총학점}/{기준}학점, 전공선택 {이수}/{기준}학점, 평점 {평점}, {어학}, {졸업인증}\"\n\n     · {어학}: 충족한 성적 하나를 \"TOEIC {점수}점\", \"TOEIC Speaking {점수}점({등급})\", \"OPIc {등급}\" 중 맞는 모양으로 적어요. 어학 요건이 없으면 \"어학 요건 없음\"이에요.\n\n     · {졸업인증}: 충족한 것을 \"졸업작품 통과\", \"졸업논문 합격\", \"졸업시험 합격(평균 {평균})\" 중 맞는 모양으로 적어요.\n\n     · 대체과목 인정, 택1, 편입 인정이 판정에 영향을 줬으면 끝에 괄호로 한 번만 붙여요. 예: \"(ABC1001을 ABC1011로 대체 인정)\"\n\n   - 졸업 요건 부족: 부족한 영역마다 \"{영역} {실제 값}, 기준({기준 값}) 미달\"을 쉼표로 잇고, 뒤에 \"나머지 요건({충족한 주요 값 2~3개} 등)은 충족\"을 붙여요. 과목이 빠졌으면 \"{영역} {과목명}({과목코드}) 미이수\", 어학이 만료됐으면 \"{시험} {성적} 유효기간 만료\"로 적어요.\n\n   - 확인 필요: 무엇이 왜 확정되지 않았는지와 확정되면 어떻게 되는지를 적고, 다른 영역이 모두 충족이면 \"나머지 요건은 충족\"을 붙여요.\n\n   - 서류 누락: missing_documents가 비어 있지 않으면 위 형식 대신 \"{빠진 서류 이름}이(가) 제출되지 않아 {관련 요건} 요건을 판정할 수 없음\" 한 문장으로 적어요. 서류가 여러 개면 \"와(과)\"로 이어요. 관련 요건은 졸업작품·졸업논문·졸업시험 서류는 \"졸업인증\", 공인어학성적 제출확인서는 \"어학\", 편입학 학점인정 확인서는 \"편입 인정 학점\", 성적증명서는 \"학점·평점\", 졸업요건 시행세칙·교육과정표·대체과목 인정표는 \"졸업 기준\"이에요. 판정 결과의 부족·충족 항목은 적지 않아요(서류가 없어서 생긴 부족일 수 있어요).\n\n   - 제외 서류(미인식·양식 외)는 reason에 적지 않아요.\n\n5. missing_documents: \"빠진 서류:\" 줄에 적힌 서류 이름을 같은 순서로 배열에 넣어요. 이름은 고치지 않아요. \"없음\"이거나 그 줄이 없으면 []예요.\n\n6. excluded_files: \"제외 서류:\" 아래의 \"- 분류 | 제목\" 줄마다 {\"file_name\": 제목, \"category\": 분류}를 같은 순서로 하나씩 넣어요. 제목과 분류는 고치지 않아요. 분류는 \"양식 외\" 또는 \"미인식\"만 써요. 다른 값이 적혀 있으면 제목이 \"제목 없음\"일 때 \"미인식\", 아니면 \"양식 외\"로 적어요. 이 목록은 decision과 reason에 영향을 주지 않아요.\n\n\n\n[출력 직전 확인 — 이 확인 내용은 출력하지 않아요]\n\n- 키 6개가 모두 있고 순서가 [틀]과 같은가\n\n- missing_documents와 excluded_files가 배열인가(비어 있으면 [])\n\n- excluded_files 개수가 \"제외 서류:\" 아래 줄 수와 같은가\n\n- reason에 형식에 없는 세부 값이나 제외 서류 이야기가 들어가지 않았는가\n\n- JSON 앞뒤에 다른 글자가 없는가"
+        }
+      ],
+      "connectionMapping": {
+        "결과_json변환": {
+          "targetType": "instruct",
+          "instructNodeName": "판정"
+        }
+      }
+    },
+    "pipelineEdges": [
+      {
+        "id": "e0",
+        "source": {
+          "nodeType": "parse"
+        },
+        "target": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        }
+      },
+      {
+        "id": "e1",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "Transcript"
+        },
+        "condition": {
+          "conditionName": "transcript"
+        }
+      },
+      {
+        "id": "e2",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "transfer_credit"
+        },
+        "condition": {
+          "conditionName": "transfer_credit"
+        }
+      },
+      {
+        "id": "e3",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "lang_cert"
+        },
+        "condition": {
+          "conditionName": "lang_cert"
+        }
+      },
+      {
+        "id": "e4",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "capstone_result"
+        },
+        "condition": {
+          "conditionName": "capstone_result"
+        }
+      },
+      {
+        "id": "e5",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "thesis_result"
+        },
+        "condition": {
+          "conditionName": "thesis_result"
+        }
+      },
+      {
+        "id": "e6",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "exam_result"
+        },
+        "condition": {
+          "conditionName": "exam_result"
+        }
+      },
+      {
+        "id": "e7",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "curriculum"
+        },
+        "condition": {
+          "conditionName": "curriculum"
+        }
+      },
+      {
+        "id": "e8",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "grad_rule"
+        },
+        "condition": {
+          "conditionName": "grad_rule"
+        }
+      },
+      {
+        "id": "e9",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "subst_table"
+        },
+        "condition": {
+          "conditionName": "subst_table"
+        }
+      },
+      {
+        "id": "e10",
+        "source": {
+          "nodeType": "classify",
+          "name": "paperwork_filter"
+        },
+        "target": {
+          "nodeType": "extract",
+          "name": "others"
+        },
+        "condition": {
+          "conditionName": "others"
+        }
+      },
+      {
+        "id": "e11",
+        "source": {
+          "nodeType": "extract",
+          "name": "Transcript"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e12",
+        "source": {
+          "nodeType": "extract",
+          "name": "transfer_credit"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e13",
+        "source": {
+          "nodeType": "extract",
+          "name": "lang_cert"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e14",
+        "source": {
+          "nodeType": "extract",
+          "name": "capstone_result"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e15",
+        "source": {
+          "nodeType": "extract",
+          "name": "thesis_result"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e16",
+        "source": {
+          "nodeType": "extract",
+          "name": "exam_result"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e17",
+        "source": {
+          "nodeType": "extract",
+          "name": "curriculum"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e18",
+        "source": {
+          "nodeType": "extract",
+          "name": "grad_rule"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e19",
+        "source": {
+          "nodeType": "extract",
+          "name": "subst_table"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e20",
+        "source": {
+          "nodeType": "extract",
+          "name": "others"
+        },
+        "target": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        }
+      },
+      {
+        "id": "e21",
+        "source": {
+          "nodeType": "merge",
+          "name": "병합-1"
+        },
+        "target": {
+          "nodeType": "match",
+          "name": "매칭-1"
+        }
+      },
+      {
+        "id": "e22",
+        "source": {
+          "nodeType": "match",
+          "name": "매칭-1"
+        },
+        "target": {
+          "nodeType": "instruct",
+          "name": "판정"
+        }
+      },
+      {
+        "id": "e23",
+        "source": {
+          "nodeType": "instruct",
+          "name": "판정"
+        },
+        "target": {
+          "nodeType": "instruct",
+          "name": "결과_json변환"
+        },
+        "condition": {
+          "conditionName": "졸업 가능"
+        }
+      },
+      {
+        "id": "e24",
+        "source": {
+          "nodeType": "instruct",
+          "name": "판정"
+        },
+        "target": {
+          "nodeType": "instruct",
+          "name": "결과_json변환"
+        },
+        "condition": {
+          "conditionName": "확인 필요"
+        }
+      },
+      {
+        "id": "e25",
+        "source": {
+          "nodeType": "instruct",
+          "name": "판정"
+        },
+        "target": {
+          "nodeType": "instruct",
+          "name": "결과_json변환"
+        },
+        "condition": {
+          "conditionName": "졸업 요건 부족"
+        }
+      }
+    ],
+    "matchConfigByName": {
+      "매칭-1": {
+        "anchorSchemaName": "Transcript",
+        "targets": [
+          {
+            "kind": "split",
+            "schemaName": "curriculum",
+            "outputKey": "cur_match",
+            "documentMatch": {
+              "enabled": false,
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            },
+            "tableMatch": {
+              "enabled": true,
+              "anchorKey": {
+                "key": "tr_course_code",
+                "groupTableTitle": "tr_courses"
+              },
+              "targetKey": {
+                "key": "cur_course_code",
+                "groupTableTitle": "cur_courses"
+              },
+              "methodType": "exact",
+              "candidateLimitInput": "2",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            }
+          },
+          {
+            "kind": "split",
+            "schemaName": "subst_table",
+            "outputKey": "sub_match",
+            "documentMatch": {
+              "enabled": false,
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            },
+            "tableMatch": {
+              "enabled": true,
+              "anchorKey": {
+                "key": "tr_course_code",
+                "groupTableTitle": "tr_courses"
+              },
+              "targetKey": {
+                "key": "sub_new_code",
+                "groupTableTitle": "sub_rows"
+              },
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            }
+          },
+          {
+            "kind": "split",
+            "schemaName": "lang_cert",
+            "outputKey": "lang_match",
+            "documentMatch": {
+              "enabled": true,
+              "anchorKey": {
+                "key": "tr_student_id"
+              },
+              "targetKey": {
+                "key": "lang_student_id"
+              },
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            },
+            "tableMatch": {
+              "enabled": false,
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            }
+          },
+          {
+            "kind": "split",
+            "schemaName": "capstone_result",
+            "outputKey": "cap_match",
+            "documentMatch": {
+              "enabled": true,
+              "anchorKey": {
+                "key": "tr_student_id"
+              },
+              "targetKey": {
+                "key": "cap_student_id"
+              },
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            },
+            "tableMatch": {
+              "enabled": false,
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            }
+          },
+          {
+            "kind": "split",
+            "schemaName": "transfer_credit",
+            "outputKey": "tc_match",
+            "documentMatch": {
+              "enabled": true,
+              "anchorKey": {
+                "key": "tr_student_id"
+              },
+              "targetKey": {
+                "key": "tc_student_id"
+              },
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            },
+            "tableMatch": {
+              "enabled": false,
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            }
+          },
+          {
+            "kind": "split",
+            "schemaName": "thesis_result",
+            "outputKey": "th_match",
+            "documentMatch": {
+              "enabled": true,
+              "anchorKey": {
+                "key": "tr_student_id"
+              },
+              "targetKey": {
+                "key": "th_student_id"
+              },
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            },
+            "tableMatch": {
+              "enabled": false,
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            }
+          },
+          {
+            "kind": "split",
+            "schemaName": "exam_result",
+            "outputKey": "ex_match",
+            "documentMatch": {
+              "enabled": true,
+              "anchorKey": {
+                "key": "tr_student_id"
+              },
+              "targetKey": {
+                "key": "ex_student_id"
+              },
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            },
+            "tableMatch": {
+              "enabled": false,
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            }
+          },
+          {
+            "kind": "split",
+            "schemaName": "grad_rule",
+            "outputKey": "rule_match",
+            "documentMatch": {
+              "enabled": true,
+              "anchorKey": {
+                "key": "tr_dept"
+              },
+              "targetKey": {
+                "key": "rule_dept"
+              },
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            },
+            "tableMatch": {
+              "enabled": false,
+              "methodType": "exact",
+              "candidateLimitInput": "",
+              "thresholdEnabled": false,
+              "minScoreInput": ""
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560" font-family="Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f3f6e"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="560" fill="#ffffff"/>
+
+  <!-- 브라우저 -->
+  <rect x="20" y="20" width="360" height="520" rx="10" fill="#f4f7fb" stroke="#1f3f6e" stroke-width="1.5"/>
+  <text x="40" y="52" font-size="18" font-weight="700" fill="#1f3f6e">담당자 브라우저</text>
+  <text x="40" y="74" font-size="12" fill="#5b6b80">HTML · CSS · JS (프레임워크 없음)</text>
+
+  <g font-size="13" fill="#1d2733">
+    <rect x="40" y="92" width="320" height="58" rx="6" fill="#fff" stroke="#b9c6d8"/>
+    <text x="54" y="115" font-weight="700">① 기준문서 <tspan font-weight="400" font-size="12" fill="#4a5a6e">(내장 + IndexedDB)</tspan></text>
+    <text x="54" y="136" font-size="12" fill="#4a5a6e">시행세칙 · 교육과정표 · 대체과목 인정표</text>
+
+    <rect x="40" y="162" width="320" height="58" rx="6" fill="#fff" stroke="#b9c6d8"/>
+    <text x="54" y="185" font-weight="700">② 서류 올리기</text>
+    <text x="54" y="206" font-size="12" fill="#4a5a6e">파일 1건 또는 폴더 일괄 (학과/학번_이름/파일)</text>
+
+    <rect x="40" y="232" width="320" height="58" rx="6" fill="#fff" stroke="#b9c6d8"/>
+    <text x="54" y="255" font-weight="700">③ 묶음 PDF 만들기 (pdf-lib)</text>
+    <text x="54" y="276" font-size="12" fill="#4a5a6e">학생 서류 + 기준문서 → PDF 1개 + 쪽 지도</text>
+
+    <rect x="40" y="302" width="320" height="58" rx="6" fill="#fff" stroke="#b9c6d8"/>
+    <text x="54" y="325" font-weight="700">④ 실행 · 재시도 · 폴링</text>
+    <text x="54" y="346" font-size="12" fill="#4a5a6e">건마다 따로 실행, 5초 폴링, 429·5xx 백오프</text>
+
+    <rect x="40" y="372" width="320" height="58" rx="6" fill="#fff" stroke="#b9c6d8"/>
+    <text x="54" y="395" font-weight="700">⑤ 결과 검증 · 담당자 확인</text>
+    <text x="54" y="416" font-size="12" fill="#4a5a6e">JSON 키·값 검사, 경고, 판정 근거 표, 메모</text>
+
+    <rect x="40" y="442" width="320" height="58" rx="6" fill="#fff" stroke="#b9c6d8"/>
+    <text x="54" y="465" font-weight="700">⑥ 내보내기</text>
+    <text x="54" y="486" font-size="12" fill="#4a5a6e">결과 PDF (한글 글꼴) · 정답지 JSON · CSV</text>
+  </g>
+  <text x="40" y="526" font-size="11" fill="#5b6b80">사정 건은 localStorage에 저장 → 탭을 닫아도 이어서 확인</text>
+
+  <!-- 서버 함수 -->
+  <rect x="440" y="120" width="250" height="320" rx="10" fill="#fff8ec" stroke="#c98a1b" stroke-width="1.5"/>
+  <text x="458" y="152" font-size="18" font-weight="700" fill="#8a5a06">Cloudflare Pages</text>
+  <text x="458" y="174" font-size="12" fill="#7a6a50">Functions (중계)</text>
+  <g font-size="12" fill="#3a2f1d" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+    <text x="458" y="210">POST   /api/files</text>
+    <text x="458" y="236">POST   /api/runs</text>
+    <text x="458" y="262">GET    /api/runs/:id</text>
+    <text x="458" y="288">GET    /api/runs/:id/steps</text>
+    <text x="458" y="314">DELETE /api/files/:id</text>
+  </g>
+  <g font-size="12" fill="#7a6a50">
+    <text x="458" y="352">· API 키 · 에이전트 ID는 서버에만</text>
+    <text x="458" y="374">· 형식·크기(20MB) 검사</text>
+    <text x="458" y="396">· 응답은 풀지 않고 흘려보냄</text>
+    <text x="458" y="418">· Retry-After 전달</text>
+  </g>
+
+  <!-- Upstage -->
+  <rect x="750" y="40" width="230" height="480" rx="10" fill="#f1ecfb" stroke="#6a45c2" stroke-width="1.5"/>
+  <text x="768" y="72" font-size="18" font-weight="700" fill="#4b2a9a">Upstage Studio</text>
+  <text x="768" y="94" font-size="12" fill="#6b5a8e">GradLens 워크플로우 (에이전트)</text>
+  <g font-size="12" fill="#2d2240">
+    <rect x="768" y="110" width="194" height="40" rx="5" fill="#fff" stroke="#b6a3e0"/>
+    <text x="780" y="128" font-weight="700">1 Parse</text><text x="780" y="143" font-size="11" fill="#6b5a8e">OCR 강제, 표 구조 유지</text>
+    <rect x="768" y="158" width="194" height="40" rx="5" fill="#fff" stroke="#b6a3e0"/>
+    <text x="780" y="176" font-weight="700">2 Classify</text><text x="780" y="191" font-size="11" fill="#6b5a8e">문서 분할, 9종 + others</text>
+    <rect x="768" y="206" width="194" height="40" rx="5" fill="#fff" stroke="#b6a3e0"/>
+    <text x="780" y="224" font-weight="700">3 Extract ×10</text><text x="780" y="239" font-size="11" fill="#6b5a8e">문서 종류별 스키마</text>
+    <rect x="768" y="254" width="194" height="40" rx="5" fill="#fff" stroke="#b6a3e0"/>
+    <text x="780" y="272" font-weight="700">4 Merge</text><text x="780" y="287" font-size="11" fill="#6b5a8e">학생 1명 단위로 합침</text>
+    <rect x="768" y="302" width="194" height="40" rx="5" fill="#fff" stroke="#b6a3e0"/>
+    <text x="780" y="320" font-weight="700">5 Match</text><text x="780" y="335" font-size="11" fill="#6b5a8e">학번·과목코드로 연결</text>
+    <rect x="768" y="350" width="194" height="40" rx="5" fill="#fff" stroke="#b6a3e0"/>
+    <text x="780" y="368" font-weight="700">6 Instruct 판정</text><text x="780" y="383" font-size="11" fill="#6b5a8e">10개 영역, 최종 판정</text>
+    <rect x="768" y="398" width="194" height="40" rx="5" fill="#fff" stroke="#b6a3e0"/>
+    <text x="780" y="416" font-weight="700">7 Instruct 결과_json변환</text><text x="780" y="431" font-size="11" fill="#6b5a8e">키 6개 JSON</text>
+  </g>
+  <g font-size="11" fill="#4a3d63" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+    <text x="768" y="466">/v2/files</text>
+    <text x="768" y="484">/v2/responses (background)</text>
+    <text x="768" y="502">?include=last | all</text>
+  </g>
+
+  <!-- 화살표 -->
+  <g stroke="#1f3f6e" stroke-width="1.6" fill="none">
+    <path d="M360 262 L440 262" marker-end="url(#a)"/>
+    <path d="M440 331 L360 331" marker-end="url(#a)"/>
+    <path d="M690 230 L750 230" marker-end="url(#a)"/>
+    <path d="M750 300 L690 300" marker-end="url(#a)"/>
+  </g>
+  <text x="377" y="254" font-size="11" fill="#1f3f6e">묶음 PDF</text>
+  <text x="374" y="348" font-size="11" fill="#1f3f6e">상태·결과</text>
+  <text x="696" y="222" font-size="11" fill="#1f3f6e">키 첨부</text>
+  <text x="696" y="318" font-size="11" fill="#1f3f6e">응답</text>
+</svg>
